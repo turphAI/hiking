@@ -1,17 +1,17 @@
 # 001 — Two peak lists, a preferred order, and a log — not a live hike tool
 
 **Date:** 2026-08-19
-**Status:** BUILDING · backend + frontend working locally, not yet on the mini
+**Status:** LANDED · live on the mini
 
 ## Where this stands
 
 Scoped end-to-end in chat after an earlier planning thread got deleted before
 anything was written down — this entry (plus `CLAUDE.md`) exists so that doesn't
-happen twice. Decided: IA, data model, stack, weather approach, and what's a
-fast-follow. Backend + frontend are now built and verified end-to-end against
-a 12-peak proof batch (real data, real weather API, real orientation map) —
-see `STATUS.md` for exactly what's landed vs. still open (full 94-peak data,
-mini deploy, `_ops` coverage).
+happen twice. Built the full v1 (all 94 peaks, list + detail, weather auto-fill,
+orientation map), vendored the `_ops` agent, and deployed to the mini — live at
+`https://mini.tail5ef0b2.ts.net/hiking/`. See `STATUS.md` for what's still open
+(mostly the `turphOps` catalog-wiring PR and the two elevation-profile/live-
+weather fast-follows below).
 
 ## The observation
 
@@ -89,7 +89,20 @@ progression order and "these go together" groupings.
 ## Where the work lives
 
 `backend/` (Flask + SQLite) and `frontend/` (Svelte 5 + Vite) — architecture
-and data model recorded in `../../CLAUDE.md`. The 12-peak proof batch and its
-sourcing are in `backend/data/seed_peaks.json` / `backend/data/SOURCES.md`.
-No PR trail yet — this repo hasn't adopted a PR workflow (single-committer,
-direct-to-main so far); revisit this section if that changes.
+and data model recorded in `../../CLAUDE.md`. All 94 peaks and their sourcing
+are in `backend/data/seed_peaks.json` / `backend/data/SOURCES.md`. `_ops/`
+agent in `ops/`. No PR trail — this repo hasn't adopted a PR workflow
+(single-committer, direct-to-main); revisit this section if that changes.
+
+## Change (landed 2026-08-19)
+
+Went from a deleted planning thread to a live app on the mini in one session:
+list + detail views, all 94 peaks (compiled via 17 parallel research passes,
+not hand-entered), weather auto-fill, orientation map, `_ops` coverage.
+Intended change ✓. One real bug caught in the process, not anticipated:
+`run-hiking.sh`/`deploy.sh` were committed without their executable bit,
+which only surfaced as a launchd `EX_CONFIG` failure on the actual mini —
+local testing (`bash script.sh`) had silently masked it. Not yet validated
+against a real hike log (no hikes recorded yet) or a real trip using the
+paper-map/orientation-map combo — that's the actual test of whether the IA
+holds up, still owed.
