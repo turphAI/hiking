@@ -1,0 +1,2 @@
+# hiking
+personal hiking journal
