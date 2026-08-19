@@ -1,0 +1,34 @@
+# Runtime data (the SQLite DB lives at repo-root data/, per backend/config.py)
+# — anchored to root so it doesn't also catch backend/data/, which holds
+# tracked seed source (seed_peaks.json, SOURCES.md).
+/data/
+*.sqlite
+*.sqlite3
+*.db
+
+# Environment / secrets
+.env
+.env.*
+
+# Logs
+logs/
+*.log
+
+# _ops generated artifacts — runtime state written on the mini, not source.
+_ops/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# Frontend build output (Flask serves this, not committed)
+static/
+
+# OS
+.DS_Store

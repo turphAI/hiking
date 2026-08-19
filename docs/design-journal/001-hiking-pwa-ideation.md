@@ -1,14 +1,17 @@
 # 001 — Two peak lists, a preferred order, and a log — not a live hike tool
 
 **Date:** 2026-08-19
-**Status:** SCOPED · not yet building
+**Status:** BUILDING · backend + frontend working locally, not yet on the mini
 
 ## Where this stands
 
 Scoped end-to-end in chat after an earlier planning thread got deleted before
 anything was written down — this entry (plus `CLAUDE.md`) exists so that doesn't
 happen twice. Decided: IA, data model, stack, weather approach, and what's a
-fast-follow. Nothing built yet — that's deliberately the next, separate step.
+fast-follow. Backend + frontend are now built and verified end-to-end against
+a 12-peak proof batch (real data, real weather API, real orientation map) —
+see `STATUS.md` for exactly what's landed vs. still open (full 94-peak data,
+mini deploy, `_ops` coverage).
 
 ## The observation
 
@@ -78,5 +81,8 @@ progression order and "these go together" groupings.
 
 ## Where the work lives
 
-Not yet — no code exists. Architecture and data model live in `../../CLAUDE.md`.
-Build order and the actual PR trail will be recorded here once building starts.
+`backend/` (Flask + SQLite) and `frontend/` (Svelte 5 + Vite) — architecture
+and data model recorded in `../../CLAUDE.md`. The 12-peak proof batch and its
+sourcing are in `backend/data/seed_peaks.json` / `backend/data/SOURCES.md`.
+No PR trail yet — this repo hasn't adopted a PR workflow (single-committer,
+direct-to-main so far); revisit this section if that changes.

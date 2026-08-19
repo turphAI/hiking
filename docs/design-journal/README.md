@@ -44,4 +44,4 @@ gets reworked. Going forward only; we don't backfill history.
 
 ## Index
 
-- [001 — Two peak lists, a preferred order, and a log — not a live hike tool](001-hiking-pwa-ideation.md) · SCOPED
+- [001 — Two peak lists, a preferred order, and a log — not a live hike tool](001-hiking-pwa-ideation.md) · BUILDING
