@@ -69,7 +69,10 @@ runtime.** Sources and shape, researched 2026-08-19:
 
 **Peak reference data (elevation/coords/trailhead/paper map ref) is a one-time
 static seed**, not a live API — no reliable API exists for these two fixed lists,
-and the data essentially never changes.
+and the data essentially never changes. All 94 peaks are seeded as of
+2026-08-19 (`backend/data/seed_peaks.json`); full sourcing, known gaps, and
+live trail-condition flags are in `backend/data/SOURCES.md` — read it before
+trusting a trailhead coordinate for a real trip.
 
 ## Views
 

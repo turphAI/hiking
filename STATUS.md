@@ -18,16 +18,19 @@ lives in `CLAUDE.md`, ideation trail in `docs/design-journal/`.
 - Deploy scaffold written (`DEPLOY.md`, `.claude/skills/deploy-mini/deploy.sh`,
   `infra/launchd/`) — mirrors witness/turphfolio exactly. **Not yet run on the
   mini** — no SSH access from this session; deploying is a separate step.
-- Seed data: **12 of 94 peaks** (6 NH, 6 ADK — enough to prove the pipeline
-  and include one real group each range). Sourced from Wikipedia infoboxes,
-  WMNF/AMC/ADK official pages; full provenance and confidence notes in
-  `backend/data/SOURCES.md`. Trailhead coordinates for the Franconia/Cascade/
-  Heart-Lake-trailhead peaks are cross-checked-but-not-official — flagged
-  there for a spot-check before fully trusting them for real directions.
+- Seed data: **all 94 peaks** (48 NH, 46 ADK), compiled via 17 parallel
+  research passes and merged 2026-08-19. 27 "done together" groups formed
+  from research-confirmed pairings (3 corrected real errors along the way —
+  see `backend/data/SOURCES.md`). Progression order extends past the
+  original researched-from-guides first 6 per range using a heuristic
+  (trailless status, length, gain). **6 peaks have no trailhead coordinate
+  and 2 have no summit coordinate** after exhaustive searching — genuinely
+  unverifiable, not guessed; full list and every other caveat (elevation
+  discrepancies resolved, live trail-closure flags, trailless-peak
+  limitations) in `backend/data/SOURCES.md`.
 
 ## Open
 
-- Compile the remaining 82 peaks (42 NH + 40 ADK) into `seed_peaks.json`.
 - Deploy to the mini (one-time setup per `DEPLOY.md`) — needs to happen on
   the mini itself or via SSH, not from this laptop session.
 - Vendor the `_ops` agent from `turphOps/templates/app-ops-agent` for
@@ -35,6 +38,8 @@ lives in `CLAUDE.md`, ideation trail in `docs/design-journal/`.
 - Generate real PWA icon PNGs — currently only an SVG favicon; the manifest
   uses it as the sole icon (`sizes: "any"`), which works but isn't the usual
   192/512 raster set the rest of the suite ships.
+- Backfill the 6 trailhead / 2 summit coordinates that no source could verify
+  (see `backend/data/SOURCES.md`) if/when a better source turns up.
 
 ## Fast-follows (not blocking v1)
 

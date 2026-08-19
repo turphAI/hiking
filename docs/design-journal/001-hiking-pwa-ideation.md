@@ -74,10 +74,17 @@ progression order and "these go together" groupings.
 
 ## Still open / owed
 
-- Whether the researched progression order actually holds up once real hikes
-  start landing against it — revisit after a handful of entries.
+- Whether the researched/heuristic progression order actually holds up once
+  real hikes start landing against it — revisit after a handful of entries.
 - The OSM-route-matching effort for the elevation-profile fast-follow hasn't been
   scoped peak-by-peak yet; that's its own pass when it's picked up.
+- 6 peaks have no trailhead coordinate and 2 have no summit coordinate after
+  exhaustive research (real gaps, not oversights — see
+  `backend/data/SOURCES.md`); revisit if a better source turns up.
+- Full-data compile (2026-08-19) surfaced two live trail-closures (Lincoln
+  Woods Trail, Sawyer River Road) affecting several peaks' standard
+  approaches — not surfaced in the app UI yet, only in `SOURCES.md`. Worth a
+  "current conditions" affordance someday, but out of scope for now.
 
 ## Where the work lives
 
