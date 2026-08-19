@@ -35,8 +35,11 @@ or any data jobs on the laptop.
   vasospasm, 5055 turphRetirement, nothing claims 5056+.
 - **Auth:** none — being on the tailnet is the auth boundary, per the rest of the
   suite.
-- **Ops coverage:** vendor `turphOps/templates/app-ops-agent` at build time; write
-  `_ops/health.json` at minimum, following `turphOps/CONTRACT.md`.
+- **Ops coverage:** `ops/agent.py` + `ops/sweep.py`, vendored from
+  `turphOps/templates/app-ops-agent` (runless-health pattern, matches
+  witness — see `ops/README.md`). `contract.py`/`scanners.py`/`issue.py` are
+  byte-identical vendored copies of `turphOps/ops_core/` — edit the canonical
+  and re-vendor, never edit here.
 
 ## Data model
 

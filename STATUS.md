@@ -33,13 +33,23 @@ lives in `CLAUDE.md`, ideation trail in `docs/design-journal/`.
 
 - Deploy to the mini (one-time setup per `DEPLOY.md`) — needs to happen on
   the mini itself or via SSH, not from this laptop session.
-- Vendor the `_ops` agent from `turphOps/templates/app-ops-agent` for
-  health/monitoring coverage (not started).
+- Two `_ops` steps deferred until real mini deployment (see `ops/README.md`):
+  installing `ops/deploy/com.turph.hiking-ops.plist`, and wiring
+  `com.turph.hiking-ops` into `turphOps/coherence.py`'s watcher catalog.
 - Generate real PWA icon PNGs — currently only an SVG favicon; the manifest
   uses it as the sole icon (`sizes: "any"`), which works but isn't the usual
   192/512 raster set the rest of the suite ships.
 - Backfill the 6 trailhead / 2 summit coordinates that no source could verify
   (see `backend/data/SOURCES.md`) if/when a better source turns up.
+
+## Landed (2026-08-19, unreleased — local only, cont'd)
+
+- `_ops` agent (`ops/agent.py`, `ops/sweep.py`) vendored from
+  `turphOps/templates/app-ops-agent`, following the runless-health pattern
+  (matches witness — interactive app, no batch runs). Verified: `python3 -m
+  ops.agent` writes valid `health.json`/`quality.json`/`topology.json`; all 7
+  `ops/tests` pass. `manifest.yaml` declares hiking's own store as an
+  unconsumed output (honest — nothing reads it yet).
 
 ## Fast-follows (not blocking v1)
 

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  hiking-_ops agent — periodic mode (CONTRACT.md §7.1).
+
+  Runs `python3 -m ops.agent` every 30 min: emits health.json, topology.json,
+  and reshapes the committed findings ledger (ops/findings.json) into
+  _ops/quality.json. Stdlib only — no venv, no deps.
+  Mini home is /Users/turph (hardcoded per turph ops convention).
+
+  There is no separate sweep plist for this app — the weekly full sweep runs
+  centrally from the laptop's com.turph.sweep-all job (turphOps/deploy/
+  sweep-all.sh). See turphOps/docs/authoring-an-app-ops-agent.md step 5.
+
+  Install on the mini:
+    cp ops/deploy/com.turph.hiking-ops.plist ~/Library/LaunchAgents/
+    launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.turph.hiking-ops.plist
+    launchctl kickstart -k gui/$(id -u)/com.turph.hiking-ops   # run once now
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.turph.hiking-ops</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>-m</string>
+    <string>ops.agent</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/turph/Projects/hiking</string>
+  <key>StartInterval</key>
+  <integer>1800</integer>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/Users/turph/Projects/hiking/ops/_ops-agent.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/turph/Projects/hiking/ops/_ops-agent.log</string>
+</dict>
+</plist>

@@ -1,0 +1,15 @@
+name: hiking
+description: NH 4000-footer & ADK 46 progress tracker and hike log — own PWA on the tailnet
+owner: turph
+schedule: []            # interactive app; the 30m hiking-ops tick handles _ops
+status_file: STATUS.md
+runner: launchd         # com.hiking.app (port 5056) + com.hiking-ops (30m) — not yet deployed, see STATUS.md
+inputs:
+  - file: backend/data/seed_peaks.json   # one-time seed, loaded by backend/seed.py — not a runtime input
+
+outputs:
+  - dir: data/               # hiking.db (peaks/groups/hikes) — hiking's own store, no external readers
+  - dir: _ops/                # health/quality/topology (hiking-ops agent); ops/findings.json is the sweep ledger
+
+created: 2026-08-19
+repo: git@github.com:turphAI/hiking.git
