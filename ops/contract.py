@@ -762,8 +762,13 @@ def complete_intent(ops_dir: Path, path) -> None:
     path = Path(path)
     done = Path(ops_dir) / INTENTS_DIRNAME / "processed"
     done.mkdir(parents=True, exist_ok=True)
+    dest = done / path.name
+    counter = 1
+    while dest.exists():
+        dest = done / f"{path.stem}_{counter}{path.suffix}"
+        counter += 1
     try:
-        path.replace(done / path.name)
+        path.replace(dest)
     except OSError:
         # The move (audit trail) failed, but the intent MUST still be consumed —
         # otherwise the next poll re-fires it as a duplicate off-schedule run.
