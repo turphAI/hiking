@@ -565,24 +565,36 @@ def sync_finding_issues(repo, app: str, before: list[dict], after: list[dict],
         prior = before_by_id.get(fid)
         status_before = prior.get("status") if prior else None
         issue = _find_issue(store, issue_id_for(app, fid))
-        settled = bool(issue) and issue["history"][-1]["stamp"] in ("confirmed", "closed")
+        history = issue.get("history") if issue else None
+        settled = bool(history) and history[-1]["stamp"] in ("confirmed", "closed")
 
-        if status_after == "open":
-            if issue is None:
-                _upsert_issue(store, _new_finding_issue(app, finding, sweep_id=sweep_id))
+        try:
+            if status_after == "open":
+                if issue is None:
+                    _upsert_issue(store, _new_finding_issue(app, finding, sweep_id=sweep_id))
+                    changed = True
+                elif settled:
+                    _upsert_issue(store, _with_stamp(issue, issue_lib.stamp_came_back(
+                        by="sweep", why="the sweep detected this finding again")))
+                    changed = True
+                # else: an open, unsettled issue already tracks this — nothing new.
+            elif (status_after == "resolved" and status_before == "open"
+                  and issue is not None and not settled):
+                _upsert_issue(store, _with_stamp(issue, issue_lib.stamp_confirmed(
+                    how="held", by="sweep",
+                    why="the sweep no longer detects this finding",
+                    refs=[f"sweep:{sweep_id}"] if sweep_id else None)))
                 changed = True
-            elif settled:
-                _upsert_issue(store, _with_stamp(issue, issue_lib.stamp_came_back(
-                    by="sweep", why="the sweep detected this finding again")))
-                changed = True
-            # else: an open, unsettled issue already tracks this — nothing new.
-        elif (status_after == "resolved" and status_before == "open"
-              and issue is not None and not settled):
-            _upsert_issue(store, _with_stamp(issue, issue_lib.stamp_confirmed(
-                how="held", by="sweep",
-                why="the sweep no longer detects this finding",
-                refs=[f"sweep:{sweep_id}"] if sweep_id else None)))
-            changed = True
+        except ValueError as e:
+            # A malformed candidate — most likely a reviewer's free-text
+            # headline containing second-person language (law 4's "you" is a
+            # rendering, never a datum check) — must not crash the whole
+            # sweep. Degrade and flag, never corrupt the run (§3.5): skip
+            # only this finding's Issue sync; ops/findings.json is
+            # untouched, and a later, cleaner-worded sweep of the same id
+            # tries again.
+            print(f"contract.sync_finding_issues: skipping {fid!r} — {e}",
+                  file=sys.stderr)
 
     if not changed:
         return None

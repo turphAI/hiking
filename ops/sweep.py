@@ -285,6 +285,11 @@ def sweep(repo: Path, *, full_sweep: bool, today: str, review=run_review,
         existing, candidates, today=today, full_sweep=full_sweep)
     contract.write_ledger(ledger_path, findings=reconciled, last_reviewed=today)
     quality = agent.build_quality(repo)  # reshape the new ledger into quality.json
+    # CONTRACT §12.5: the sweep is an Issue-record stamp writer too — noticed
+    # for a new finding, `confirmed — held` for one it resolved, `came back`
+    # for a regression. Additive to the ledger write above (§12.7);
+    # `ops/issues.json` is untracked, sibling to the ledger.
+    contract.sync_finding_issues(repo, agent.APP, existing, reconciled)
     return {
         "mode": "full" if full_sweep else "diff",
         "candidates": len(candidates),
