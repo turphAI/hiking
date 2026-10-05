@@ -85,6 +85,10 @@ AUTHORITY: dict[str, dict[str, tuple | None]] = {
     "repo-doctor": {"noticed": None, "worked": None, "closed": ("done",)},
     "verifier": {"confirmed": None, "closed": ("done",)},
     "manager": {"noticed": None, "brought to": None},  # noticed: about producers
+    # land_pr.py (2026-10-04, ONE-WORD-LOOP): deploys a PR a human confirmed
+    # (worked — "deployed"), or asks that human when the deploy fails. The
+    # merge itself is the human's approved, never this row's.
+    "lander": {"worked": None, "brought to": None},
 }
 MACHINE_WRITERS = frozenset(AUTHORITY)
 
