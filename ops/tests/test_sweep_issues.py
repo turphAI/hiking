@@ -20,16 +20,9 @@ def _no_security(r, full_sweep, changed):
     return []
 
 
-def test_sweep_writes_noticed_then_confirmed(tmp_path):
+def test_sweep_leaves_issues_to_turphops(tmp_path):
+    """Issue stamps are turphOps' job (issue_sync.py via sweep-all.sh, CONTRACT §12.5); the sweep must never write ops/issues.json itself."""
     _ledger(tmp_path, [])
     sweep.sweep(tmp_path, full_sweep=True, today="2026-10-11",
                 review=lambda r, s: [_cand("new-b")], security=_no_security)
-    (issue,) = contract.load_issue_store(tmp_path)["issues"]
-    assert issue["id"] == "hiking:finding:new-b"
-    assert [s["stamp"] for s in issue["history"]] == ["noticed"]
-
-    sweep.sweep(tmp_path, full_sweep=True, today="2026-10-18",
-                review=lambda r, s: [], security=_no_security)
-    (issue,) = contract.load_issue_store(tmp_path)["issues"]
-    assert [s["stamp"] for s in issue["history"]] == ["noticed", "confirmed"]
-    assert issue["history"][-1]["how"] == "held"
+    assert not (tmp_path / "ops" / "issues.json").exists()
