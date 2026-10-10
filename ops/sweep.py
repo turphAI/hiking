@@ -79,7 +79,11 @@ REVIEW_PROMPT = (
     "no code fences), where each element is:\n"
     '  {"id": "<stable-kebab-slug-of-the-issue>", "severity": "high|medium|low", '
     '"area": "security|durability|data_integrity|efficiency", '
-    '"headline": "<one self-contained sentence>", "location": "<path:line>"}\n'
+    '"headline": "<one self-contained sentence>", "location": "<path:line>", '
+    '"plain": "<what goes wrong for someone using the app>"}\n'
+    "The plain line is for the owner, who reads it on his phone and does not read "
+    "code: no function, file or variable names, no second person, one short "
+    "sentence under 80 characters. "
     "The id MUST be stable: the same underlying issue must produce the same id on "
     "a later run. Be conservative — no style nits, no speculation. If nothing "
     "material is wrong, output []."
@@ -100,7 +104,8 @@ def _validate_candidates(raw: list) -> list[dict]:
         if r.get("severity") not in _SEVERITIES or r.get("area") not in _AREAS:
             continue
         out.append({"id": fid, "severity": r["severity"], "area": r["area"],
-                    "headline": headline, "location": r.get("location")})
+                    "headline": headline, "location": r.get("location"),
+                    "plain": contract.plain_line(r.get("plain"))})
     return out
 
 

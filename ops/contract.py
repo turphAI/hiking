@@ -150,7 +150,7 @@ def make_finding(finding_id: str, *, severity: str, area: str, status: str,
                  detail_url: str | None = None, state: str | None = None,
                  fix_ref: str | None = None, verdict_reason: str | None = None,
                  verdict_at: str | None = None,
-                 sweep_id: str | None = None) -> dict:
+                 sweep_id: str | None = None, plain: str | None = None) -> dict:
     """Build a quality finding (CONTRACT.md §4.7). ``finding_id`` must be stable
     + semantic (§3.3) and ``headline`` must stand alone (§3.4). Optional fields
     are present-as-null so the shape is uniform. The adapter validates the enum
@@ -162,7 +162,9 @@ def make_finding(finding_id: str, *, severity: str, area: str, status: str,
     ``status_for_state`` for the pairing; ``fix_ref`` is free text pointing at
     the fix ("PR #50", a commit sha); ``verdict_reason`` / ``verdict_at``
     (ISO date) record why/when a human accepted or parked it; ``sweep_id``
-    tags the sweep batch that first produced the finding."""
+    tags the sweep batch that first produced the finding; ``plain`` is the
+    owner-facing line, what goes wrong for someone using the app (see
+    ``plain_line``)."""
     f = {
         "id": finding_id,
         "severity": severity,
@@ -176,10 +178,33 @@ def make_finding(finding_id: str, *, severity: str, area: str, status: str,
     }
     for k, v in (("state", state), ("fix_ref", fix_ref),
                  ("verdict_reason", verdict_reason), ("verdict_at", verdict_at),
-                 ("sweep_id", sweep_id)):
+                 ("sweep_id", sweep_id), ("plain", plain)):
         if v is not None:
             f[k] = v
     return f
+
+
+PLAIN_MAX = 200
+# Finding fields a ledger reshaper carries into _ops/quality.json beyond the
+# nine base keys: the lifecycle (who's on it, a human's verdict) and the plain
+# line. Without them a let-go finding reads as open downstream.
+FINDING_EXTRAS = ("state", "fix_ref", "verdict_reason", "verdict_at", "sweep_id", "plain")
+
+
+def plain_line(text) -> str | None:
+    """A reviewer's owner-facing line, cleaned, or None (vantage theme 8 B5).
+
+    It says what goes wrong for someone using the app, in words the owner reads
+    on his phone. A line that isn't a non-empty string, carries code (a
+    backtick), or speaks in the second person (law 4: "you" is the renderer's
+    job) is dropped, never repaired: no line is better than an invented one,
+    and the engineer headline still stands."""
+    if not isinstance(text, str):
+        return None
+    line = " ".join(text.split())
+    if not line or "`" in line or issue_lib._SECOND_PERSON.search(line):
+        return None
+    return line[:PLAIN_MAX]
 
 
 def status_for_state(state: str) -> str:
@@ -328,14 +353,14 @@ def reconcile_findings(existing: list[dict], swept: list[dict], *, today: str,
                        full_sweep: bool, sweep_id: str | None = None) -> list[dict]:
     """Merge a review sweep's findings into the existing ledger, keyed on the
     stable finding id (CONTRACT.md §3.3). The reviewer supplies only the
-    descriptive fields (id, severity, area, headline, location); reconciliation
+    descriptive fields (id, severity, area, headline, location, plain); reconciliation
     owns status / first_seen / resolved_at (and, where a row carries the
     optional ``state``, keeps it coherent with status).
 
     Per-id rules:
       - in sweep, new id            → open finding, first_seen = today (stamped
                                       with ``sweep_id`` when given)
-      - in sweep, ledger open       → refresh severity/area/headline/location;
+      - in sweep, ledger open       → refresh severity/area/headline/location/plain;
                                       stays open, first_seen kept. A ``state``
                                       of ``fix_in_flight`` is kept (a fix is
                                       expected to still be detectable); any
@@ -373,7 +398,7 @@ def reconcile_findings(existing: list[dict], swept: list[dict], *, today: str,
                 out.append(dict(cur))  # human verdict — left alone
                 continue
             merged = dict(cur)
-            for k in ("severity", "area", "headline", "location"):
+            for k in ("severity", "area", "headline", "location", "plain"):
                 if fresh.get(k) is not None:
                     merged[k] = fresh[k]
             if status == "resolved":  # the sweep sees it again → regression
@@ -400,7 +425,7 @@ def reconcile_findings(existing: list[dict], swept: list[dict], *, today: str,
             f["id"], severity=f.get("severity"), area=f.get("area"),
             status="open", headline=f.get("headline"), location=f.get("location"),
             first_seen=today, resolved_at=None, detail_url=f.get("detail_url"),
-            sweep_id=sweep_id,
+            sweep_id=sweep_id, plain=f.get("plain"),
         ))
     return out
 
