@@ -86,6 +86,7 @@ def shape_findings(raw: list) -> list[dict]:
             first_seen=r.get("first_seen"),
             resolved_at=r.get("resolved_at"),
             detail_url=r.get("detail_url"),
+            **{k: r[k] for k in contract.FINDING_EXTRAS if r.get(k) is not None},
         ))
     return shaped
 
