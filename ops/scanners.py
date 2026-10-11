@@ -194,24 +194,30 @@ def _run_json_tool(cmd: list[str], cwd: Path, out_file: Path | None = None,
 
 
 def run_gitleaks(repo: Path) -> list[dict] | None:
-    """Scan the files git tracks for secrets (no git history — the conservative
-    slice-1 scope). Only tracked files: a checkout on the mini also holds
-    gitignored runtime data (a secrets.env, message stores, digests) that never
-    reaches GitHub, and scanning the whole folder raised it as leaks (2026-10-11).
-    The tracked files are copied out with ``git checkout-index`` and scanned
-    there. None if gitleaks is missing, the copy fails, or its report can't be
-    parsed."""
+    """Scan for secrets in every file git doesn't ignore, as it is on disk (no git
+    history — the conservative slice-1 scope): tracked files with their unstaged
+    edits, and new files not yet added. That's everything that could reach
+    GitHub. Gitignored files are left out: a checkout on the mini holds runtime
+    data (a secrets.env, message stores, digests) that never does, and scanning
+    the whole folder raised it as leaks (2026-10-11). None if gitleaks is
+    missing, the file list can't be read, or the report can't be parsed."""
     repo = Path(repo)
     if shutil.which("gitleaks") is None:
         return None
     with tempfile.TemporaryDirectory() as tree, tempfile.NamedTemporaryFile(suffix=".json") as tf:
         try:
-            copied = subprocess.run(["git", "checkout-index", "-a", f"--prefix={tree}/"],
+            listed = subprocess.run(["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
                                     cwd=str(repo), capture_output=True, timeout=120)
         except (OSError, subprocess.TimeoutExpired):
             return None
-        if copied.returncode != 0:
+        if listed.returncode != 0:
             return None
+        for rel in filter(None, listed.stdout.decode("utf-8", "surrogateescape").split("\0")):
+            src = repo / rel
+            if src.is_file() and not src.is_symlink():   # a deleted tracked file isn't on disk
+                dst = Path(tree) / rel
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(src, dst)
         report = _run_json_tool(
             ["gitleaks", "dir", ".", "--report-format", "json",
              "--report-path", tf.name, "--no-banner"],
