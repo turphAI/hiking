@@ -150,7 +150,8 @@ def make_finding(finding_id: str, *, severity: str, area: str, status: str,
                  detail_url: str | None = None, state: str | None = None,
                  fix_ref: str | None = None, verdict_reason: str | None = None,
                  verdict_at: str | None = None,
-                 sweep_id: str | None = None, plain: str | None = None) -> dict:
+                 sweep_id: str | None = None, plain: str | None = None,
+                 resolved_by: str | None = None) -> dict:
     """Build a quality finding (CONTRACT.md §4.7). ``finding_id`` must be stable
     + semantic (§3.3) and ``headline`` must stand alone (§3.4). Optional fields
     are present-as-null so the shape is uniform. The adapter validates the enum
@@ -164,7 +165,8 @@ def make_finding(finding_id: str, *, severity: str, area: str, status: str,
     (ISO date) record why/when a human accepted or parked it; ``sweep_id``
     tags the sweep batch that first produced the finding; ``plain`` is the
     owner-facing line, what goes wrong for someone using the app (see
-    ``plain_line``)."""
+    ``plain_line``); ``resolved_by`` (from RESOLVED_BY) names the evidence a
+    ``resolved`` status rests on (journal 034)."""
     f = {
         "id": finding_id,
         "severity": severity,
@@ -178,17 +180,35 @@ def make_finding(finding_id: str, *, severity: str, area: str, status: str,
     }
     for k, v in (("state", state), ("fix_ref", fix_ref),
                  ("verdict_reason", verdict_reason), ("verdict_at", verdict_at),
-                 ("sweep_id", sweep_id), ("plain", plain)):
+                 ("sweep_id", sweep_id), ("plain", plain),
+                 ("resolved_by", resolved_by)):
         if v is not None:
             f[k] = v
     return f
+
+
+# How a finding came to read ``resolved`` (CONTRACT §4.7, journal 034). Written
+# by the writer that produced the evidence, never by reconcile_findings: a full
+# review falling silent about a finding is not evidence that it is gone (the
+# reviewer is a model; the same defect flickered under two ids in insurance
+# between 2026-09-27 and 2026-10-11). A ``resolved`` row without one is an
+# unverified resolution: the sync never confirms it and records-agree names it.
+RESOLVED_BY = ("recheck", "scanner", "verifier", "file-gone", "absence")
+RESOLVED_WHY = {
+    "recheck": "a targeted re-read of its location found it gone",
+    "scanner": "the deterministic scanner that reports this class no longer does",
+    "verifier": "the mechanical verify pass found it gone",
+    "file-gone": "the file it pointed at no longer exists",
+    "absence": "it names no location to re-read, so only the full review's silence speaks",
+}
 
 
 PLAIN_MAX = 200
 # Finding fields a ledger reshaper carries into _ops/quality.json beyond the
 # nine base keys: the lifecycle (who's on it, a human's verdict) and the plain
 # line. Without them a let-go finding reads as open downstream.
-FINDING_EXTRAS = ("state", "fix_ref", "verdict_reason", "verdict_at", "sweep_id", "plain")
+FINDING_EXTRAS = ("state", "fix_ref", "verdict_reason", "verdict_at", "sweep_id", "plain",
+                  "resolved_by")
 
 
 def plain_line(text) -> str | None:
@@ -377,7 +397,11 @@ def reconcile_findings(existing: list[dict], swept: list[dict], *, today: str,
                                       when present, → resolved) ONLY when
                                       ``full_sweep`` (an authoritative whole-repo
                                       pass); an incremental/PR-gate sweep leaves
-                                      out-of-scope findings untouched
+                                      out-of-scope findings untouched. The row
+                                      carries no ``resolved_by``: silence is not
+                                      evidence (journal 034). turphOps'
+                                      resolve_check re-reads the location and
+                                      either stamps the evidence or reopens it
       - absent from sweep, resolved/wontfix/accepted/parked → untouched
                                       (history and verdicts are retained)
 
@@ -404,6 +428,7 @@ def reconcile_findings(existing: list[dict], swept: list[dict], *, today: str,
             if status == "resolved":  # the sweep sees it again → regression
                 merged["status"] = "open"
                 merged["resolved_at"] = None
+            merged.pop("resolved_by", None)  # seen again: old evidence is void
             if "state" in merged and merged["state"] != "fix_in_flight":
                 merged["state"] = "open"  # still detected — resolution didn't hold
             out.append(merged)
@@ -412,6 +437,7 @@ def reconcile_findings(existing: list[dict], swept: list[dict], *, today: str,
                 merged = dict(cur)
                 merged["status"] = "resolved"
                 merged["resolved_at"] = today
+                merged.pop("resolved_by", None)  # unverified until re-checked
                 if "state" in merged:
                     merged["state"] = "resolved"
                 out.append(merged)
@@ -558,27 +584,35 @@ def sync_finding_issues(repo, app: str, before: list[dict], after: list[dict],
       - an ``open`` finding whose matching issue is already settled
         (``confirmed``/``closed``) — a regression the sweep redetected —
         gets ``came back``.
-      - a finding ``resolved`` this sweep (``open`` in ``before``,
-        ``resolved`` in ``after``) whose matching issue isn't already settled
-        gets ``confirmed — held``. No matching issue → skipped: the sweep
+      - a ``resolved`` finding whose matching issue isn't settled gets
+        ``confirmed — held`` — but only when the row carries ``resolved_by``
+        (RESOLVED_BY): the evidence the confirmation rests on, named in the
+        stamp's ``why`` and ``refs`` (journal 034). A resolved row without it
+        is an unverified resolution and is left alone for records-agree to
+        name. This reads the ledger's state, not one sweep's transition, so a
+        confirmation the sync missed one week (lock timeout, failed run) is
+        written the next. It never answers a human's unanswered *came back*
+        (``issue.contested_by_human``). No matching issue → skipped: the sweep
         confirms an issue it (or dispatcher/verifier) already opened, it
         never fabricates one purely to close it.
       - anything else — still open and already tracked, wontfix/accepted/
         parked either way, or resolved with no prior issue — is untouched.
         ``wontfix``/``accepted``/``parked`` findings are never turned into
-        issues here: no verdict write-path records *who* decided that yet
-        (§4.7), and a stamp's ``by`` is never fabricated (law 4).
+        issues here: let_go writes both records for a verdict itself, and a
+        stamp's ``by`` is never fabricated (law 4).
 
-    Only ``open``/``resolved`` status transitions drive this — ``state``
-    (``fix_in_flight``/``resolved_pending_verify``) is dispatcher's and
-    mark_fixed.py's to set, never the sweep's (CONTRACT §4.7's own split of
-    authority).
+    "Settled" is ``issue.is_settled``: a confirmed/closed stamp since the last
+    *came back* (one definition for every reader, journal 034). ``before`` is
+    the ledger as committed before the sweep; the stamps no longer depend on
+    it, but sweep-all passes it and resolve_check reads it, so the call shape
+    stays. ``state`` (``fix_in_flight``/``resolved_pending_verify``) is
+    dispatcher's and mark_fixed.py's to set, never the sweep's (CONTRACT
+    §4.7's own split of authority).
 
     Returns the updated store, or ``None`` when nothing changed — a fresh
     ``load_issue_store`` + no-op write is skipped, so a caller knows whether
     there's anything to persist/mirror."""
-    before_by_id = {f["id"]: f for f in before
-                    if isinstance(f, dict) and f.get("id")}
+    del before  # kept for the call shape; see the docstring
     after_by_id = {f["id"]: f for f in after
                    if isinstance(f, dict) and f.get("id")}
     store = load_issue_store(repo)
@@ -587,11 +621,9 @@ def sync_finding_issues(repo, app: str, before: list[dict], after: list[dict],
         status_after = finding.get("status")
         if status_after not in ("open", "resolved"):
             continue
-        prior = before_by_id.get(fid)
-        status_before = prior.get("status") if prior else None
         issue = _find_issue(store, issue_id_for(app, fid))
-        history = issue.get("history") if issue else None
-        settled = bool(history) and history[-1]["stamp"] in ("confirmed", "closed")
+        history = (issue.get("history") or []) if issue else []
+        settled = issue_lib.is_settled(history)
 
         try:
             if status_after == "open":
@@ -603,12 +635,15 @@ def sync_finding_issues(repo, app: str, before: list[dict], after: list[dict],
                         by="sweep", why="the sweep detected this finding again")))
                     changed = True
                 # else: an open, unsettled issue already tracks this — nothing new.
-            elif (status_after == "resolved" and status_before == "open"
-                  and issue is not None and not settled):
+            elif (status_after == "resolved" and issue is not None and not settled
+                  and finding.get("resolved_by") in RESOLVED_BY
+                  and not issue_lib.contested_by_human(history)):
+                evidence = finding["resolved_by"]
+                refs = ([f"sweep:{sweep_id}"] if sweep_id else []) + [f"resolved_by:{evidence}"]
                 _upsert_issue(store, _with_stamp(issue, issue_lib.stamp_confirmed(
                     how="held", by="sweep",
-                    why="the sweep no longer detects this finding",
-                    refs=[f"sweep:{sweep_id}"] if sweep_id else None)))
+                    why=f"the sweep no longer detects this finding; {RESOLVED_WHY[evidence]}",
+                    refs=refs)))
                 changed = True
         except ValueError as e:
             # A malformed candidate — most likely a reviewer's free-text

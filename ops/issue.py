@@ -101,6 +101,42 @@ HUMAN_AUTHORITY: dict[str, tuple | None] = {
 }
 
 
+# --- settled: one definition (journal 034, CONTRACT §12.3) ---------------------
+# An Issue is settled when a *confirmed* or *closed* stamp stands since its last
+# *came back*. A later ask (*brought to*) or later work (*worked*, *approved*)
+# does not unsettle it; only *came back* reopens. Before journal 034 the sync
+# and records-agree read "the last stamp" while the dispatcher read "since the
+# last came back", and the two disagreed on a live Issue (insurance,
+# 2026-10-11: confirmed, then a dispatcher ask about its fix PR).
+
+SETTLING = ("confirmed", "closed")
+
+
+def since_came_back(history: list) -> list:
+    """The stamps after the last *came back* (every stamp when there is none)."""
+    stamps = [s for s in history or [] if isinstance(s, dict)]
+    for i in range(len(stamps) - 1, -1, -1):
+        if stamps[i].get("stamp") == "came back":
+            return stamps[i + 1:]
+    return stamps
+
+
+def is_settled(history: list) -> bool:
+    return any(s.get("stamp") in SETTLING for s in since_came_back(history))
+
+
+def contested_by_human(history: list) -> bool:
+    """A human's *came back* stands with no settling stamp after it. A machine
+    never answers that verdict with its own confirmation (humans contest machine
+    truth via came back, S18); the human, or a fresh human-visible fact, does."""
+    stamps = [s for s in history or [] if isinstance(s, dict)]
+    for i in range(len(stamps) - 1, -1, -1):
+        if stamps[i].get("stamp") == "came back":
+            return stamps[i].get("by") not in MACHINE_WRITERS and \
+                not any(s.get("stamp") in SETTLING for s in stamps[i + 1:])
+    return False
+
+
 # --- the humans registry (CONTRACT.md §12.6) ----------------------------------
 
 DEFAULT_REGISTRY_PATH = Path.home() / "Projects" / "_shared" / "humans.json"
