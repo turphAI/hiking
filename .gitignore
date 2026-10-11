@@ -32,3 +32,6 @@ static/
 
 # OS
 .DS_Store
+
+# Issue record: written on the mini by turphOps issue_sync (gitignored everywhere, CONTRACT §12)
+ops/issues.json
