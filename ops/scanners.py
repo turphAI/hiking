@@ -194,17 +194,31 @@ def _run_json_tool(cmd: list[str], cwd: Path, out_file: Path | None = None,
 
 
 def run_gitleaks(repo: Path) -> list[dict] | None:
-    """Scan the working tree for secrets (no git history — the conservative slice-1
-    scope). None if gitleaks is missing or its report can't be parsed."""
+    """Scan the files git tracks for secrets (no git history — the conservative
+    slice-1 scope). Only tracked files: a checkout on the mini also holds
+    gitignored runtime data (a secrets.env, message stores, digests) that never
+    reaches GitHub, and scanning the whole folder raised it as leaks (2026-10-11).
+    The tracked files are copied out with ``git checkout-index`` and scanned
+    there. None if gitleaks is missing, the copy fails, or its report can't be
+    parsed."""
     repo = Path(repo)
-    with tempfile.NamedTemporaryFile(suffix=".json") as tf:
+    if shutil.which("gitleaks") is None:
+        return None
+    with tempfile.TemporaryDirectory() as tree, tempfile.NamedTemporaryFile(suffix=".json") as tf:
+        try:
+            copied = subprocess.run(["git", "checkout-index", "-a", f"--prefix={tree}/"],
+                                    cwd=str(repo), capture_output=True, timeout=120)
+        except (OSError, subprocess.TimeoutExpired):
+            return None
+        if copied.returncode != 0:
+            return None
         report = _run_json_tool(
             ["gitleaks", "dir", ".", "--report-format", "json",
              "--report-path", tf.name, "--no-banner"],
-            cwd=repo, out_file=Path(tf.name))
-    if not isinstance(report, list):
-        return None
-    return _gitleaks_findings(report, repo)
+            cwd=Path(tree), out_file=Path(tf.name))
+        if not isinstance(report, list):
+            return None
+        return _gitleaks_findings(report, Path(tree))
 
 
 def run_pip_audit(repo: Path) -> list[dict] | None:
