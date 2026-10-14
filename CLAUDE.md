@@ -37,9 +37,9 @@ or any data jobs on the laptop.
   suite.
 - **Ops coverage:** `ops/agent.py` + `ops/sweep.py`, vendored from
   `turphOps/templates/app-ops-agent` (runless-health pattern, matches
-  witness — see `ops/README.md`). `contract.py`/`scanners.py`/`issue.py` are
-  byte-identical vendored copies of `turphOps/ops_core/` — edit the canonical
-  and re-vendor, never edit here.
+  witness — see `ops/README.md`). `contract`/`issue`/`scanners` are imported
+  from `turphOps/ops_core` (one copy, found by `ops/__init__.py`; turphOps
+  journal 035) — nothing from ops_core lives in this repo.
 
 ## Data model
 

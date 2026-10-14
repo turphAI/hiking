@@ -1,6 +1,7 @@
 """The code check's plain line (vantage theme 8 B5): the reviewer writes what goes
 wrong for someone using the app, and only a plain line is kept."""
-from ops import contract, sweep
+from ops import sweep
+from ops_core import contract
 
 
 def _cand(**extra):
