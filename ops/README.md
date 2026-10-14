@@ -47,9 +47,11 @@ cd ~/Projects/hiking && python3 -m ops.sweep        # full code-health sweep (ne
 ~/Projects/turphOps/.venv/bin/python -m pytest ops/tests -q
 ```
 
-`contract.py` and `scanners.py` are **byte-identical vendored copies** of
-`turphOS/turphOps/ops_core/`. Do not edit them here — edit the canonical and
-re-vendor.
+`contract`, `issue` and `scanners` are **imported from `turphOS/turphOps/ops_core`**,
+not copied: `ops/__init__.py` finds `~/Projects/turphOps` (or `$TURPHOPS_ROOT`)
+and fails loudly if it's missing. hiking was the pilot for this (turphOps
+journal 035, `docs/specs/shared-core.md` S1, 2026-10-14). To change the core,
+change it in turphOps and run its `core_check.py`.
 
 ## Not yet wired up
 

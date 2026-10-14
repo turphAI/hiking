@@ -36,7 +36,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from ops import agent, contract, scanners
+from ops import agent
+from ops_core import contract, scanners
 
 # The reviewer's vocabulary — severities/statuses from the contract, the areas
 # the suite settled on (mirrors agent._VALID_AREAS). "docs" is not part of the

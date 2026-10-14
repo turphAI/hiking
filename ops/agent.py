@@ -21,7 +21,7 @@ import json
 import os
 from pathlib import Path
 
-from ops import contract
+from ops_core import contract
 
 APP = "hiking"
 

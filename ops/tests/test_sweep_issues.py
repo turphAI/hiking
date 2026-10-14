@@ -1,7 +1,8 @@
 """The hiking sweep is an Issue-record stamp writer (CONTRACT §12.5), like
 every other swept producer: noticed for a new finding, `confirmed — held`
 when the sweep stops seeing it."""
-from ops import contract, sweep
+from ops import sweep
+from ops_core import contract
 
 
 def _ledger(repo, findings):

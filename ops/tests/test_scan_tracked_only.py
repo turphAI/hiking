@@ -6,7 +6,7 @@ import subprocess
 
 import pytest
 
-from ops import scanners
+from ops_core import scanners
 
 
 def _repo(tmp_path):
