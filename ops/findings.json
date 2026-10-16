@@ -1,6 +1,6 @@
 {
   "last_reviewed": "2026-10-14",
-  "_note": "Code-health findings ledger. Source of truth (in git). Review passes (founding sweep, scheduled sweep, PR-gate) append/update entries here; ops/agent.py shapes this into _ops/quality.json per turphOps CONTRACT.md §4.7. severity: high|medium|low. status: open|resolved|wontfix. area: security|durability|data_integrity|efficiency. Optional lifecycle (§4.7): state open|fix_in_flight|resolved_pending_verify|resolved|accepted|parked refines status; fix_ref, verdict_reason, verdict_at, sweep_id.",
+  "_note": "Code-health findings ledger. Source of truth (in git). Review passes (founding sweep, scheduled sweep, PR-gate) append/update entries here; ops/agent.py shapes this into _ops/quality.json per turphOps CONTRACT.md \u00a74.7. severity: high|medium|low. status: open|resolved|wontfix. area: security|durability|data_integrity|efficiency. Optional lifecycle (\u00a74.7): state open|fix_in_flight|resolved_pending_verify|resolved|accepted|parked refines status; fix_ref, verdict_reason, verdict_at, sweep_id.",
   "findings": [
     {
       "id": "seed-reseed-breaks-hike-fk",
@@ -30,52 +30,56 @@
       "id": "dep-npm-brace-expansion",
       "severity": "high",
       "area": "security",
-      "status": "open",
-      "headline": "npm dependency brace-expansion 2.0.0 - 2.1.6 || 4.0.0 - 5.0.11 has a high advisory — brace-expansion: Quadratic-time expansion of the `{a},b}` rewrite causes CPU denial of service.",
+      "status": "resolved",
+      "headline": "npm dependency brace-expansion 2.0.0 - 2.1.6 || 4.0.0 - 5.0.11 has a high advisory \u2014 brace-expansion: Quadratic-time expansion of the `{a},b}` rewrite causes CPU denial of service.",
       "location": "frontend/package.json",
       "first_seen": "2026-10-11",
-      "resolved_at": null,
-      "detail_url": null
+      "resolved_at": "2026-10-16",
+      "detail_url": null,
+      "resolved_by": "verifier"
     },
     {
       "id": "dep-npm-devalue",
       "severity": "high",
       "area": "security",
-      "status": "open",
-      "headline": "npm dependency devalue <=5.9.2 has a high advisory — Svelte devalue: DoS via malformed input.",
+      "status": "resolved",
+      "headline": "npm dependency devalue <=5.9.2 has a high advisory \u2014 Svelte devalue: DoS via malformed input.",
       "location": "frontend/package.json",
       "first_seen": "2026-10-11",
-      "resolved_at": null,
-      "detail_url": null
+      "resolved_at": "2026-10-16",
+      "detail_url": null,
+      "resolved_by": "verifier"
     },
     {
       "id": "dep-npm-fast-uri",
       "severity": "high",
       "area": "security",
-      "status": "open",
-      "headline": "npm dependency fast-uri 3.0.0 - 3.1.7 has a high advisory — fast-uri vulnerable to host confusion via skipped IDN canonicalization on scheme-relative references.",
+      "status": "resolved",
+      "headline": "npm dependency fast-uri 3.0.0 - 3.1.7 has a high advisory \u2014 fast-uri vulnerable to host confusion via skipped IDN canonicalization on scheme-relative references.",
       "location": "frontend/package.json",
       "first_seen": "2026-10-11",
-      "resolved_at": null,
-      "detail_url": null
+      "resolved_at": "2026-10-16",
+      "detail_url": null,
+      "resolved_by": "verifier"
     },
     {
       "id": "dep-npm-source-map-js",
       "severity": "high",
       "area": "security",
-      "status": "open",
-      "headline": "npm dependency source-map-js 1.0.0 - 1.2.1 has a high advisory — source-map-js allows event-loop denial of service through indexed source-map section offsets.",
+      "status": "resolved",
+      "headline": "npm dependency source-map-js 1.0.0 - 1.2.1 has a high advisory \u2014 source-map-js allows event-loop denial of service through indexed source-map section offsets.",
       "location": "frontend/package.json",
       "first_seen": "2026-10-11",
-      "resolved_at": null,
-      "detail_url": null
+      "resolved_at": "2026-10-16",
+      "detail_url": null,
+      "resolved_by": "verifier"
     },
     {
       "id": "status-doc-stale",
       "severity": "low",
       "area": "docs",
       "status": "open",
-      "headline": "STATUS.md unchanged across 8 commits to code since 2026-08-19 — reconcile it or confirm it still reflects reality.",
+      "headline": "STATUS.md unchanged across 8 commits to code since 2026-08-19 \u2014 reconcile it or confirm it still reflects reality.",
       "location": "STATUS.md",
       "first_seen": "2026-10-11",
       "resolved_at": null,
