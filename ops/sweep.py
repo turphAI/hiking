@@ -37,7 +37,7 @@ from datetime import datetime
 from pathlib import Path
 
 from ops import agent
-from ops_core import contract, scanners
+from ops_core import contract, review_sandbox, scanners
 
 # The reviewer's vocabulary — severities/statuses from the contract, the areas
 # the suite settled on (mirrors agent._VALID_AREAS). "docs" is not part of the
@@ -146,14 +146,14 @@ def run_review(repo: Path, scope_files: list[str] | None = None) -> list[dict] |
     prompt = REVIEW_PROMPT
     if scope_files:
         prompt += "\n\nReview ONLY these changed files:\n" + "\n".join(scope_files)
-    try:
-        proc = subprocess.run(
-            ["claude", "-p", prompt, "--output-format", "json"],
-            cwd=str(repo), capture_output=True, text=True, timeout=600,
-        )
-    except (OSError, subprocess.TimeoutExpired):
-        return None
-    if proc.returncode != 0:
+    # The reviewer runs on a COPY holding only the in-scope code. With cwd=repo its file
+    # tools could read data/ and .env whatever the prompt asks; here they are simply not
+    # there (ops_core.review_sandbox).
+    proc = review_sandbox.run_in_sandbox(
+        repo, review_sandbox.files_for(repo, scope_files, _in_scope),
+        ["claude", "-p", prompt, "--output-format", "json"],
+        timeout=600, prefix="hiking-sweep-review-")
+    if proc is None or proc.returncode != 0:
         return None
     return _parse_review_json(proc.stdout)
 
