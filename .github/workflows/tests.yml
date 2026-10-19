@@ -1,15 +1,16 @@
 name: tests
-# Hiking had no CI. This runs its backend tests (the seed's in-place sync, so far) on every
-# push and PR. They are offline and need only the app's own requirements.
-#
-# NOT here yet: the ops tests (ops/tests). They import the shared ops core from the private
-# turphOps repo, which needs a read-only deploy key stored as the TURPHOPS_DEPLOY_KEY
-# secret on this repo (hiking lives in the turphAI org, so it does not inherit turphOS's).
-# Once that secret exists, copy the `pytest` job from turphOS/turphReLo's tests.yml. Until
-# then the ops tests run by hand: TURPHOPS_ROOT=~/Projects/turphOps python -m pytest ops/tests
+# Hiking's backend tests (Python 3.12, the app's own requirements) and its ops tests (Python 3.9,
+# the mini's system python3, which the stdlib-only ops agent runs on). Offline; fixtures only.
 on:
   push:
   pull_request:
+env:
+  # The shared ops core is imported from turphOps (journal 035); the runner has no
+  # ~/Projects/turphOps, so the ops job checks it out beside this repo and ops/__init__.py's
+  # bootstrap finds it here. TURPHOPS_DEPLOY_KEY: the private half of a read-only deploy key
+  # registered on turphOS/turphOps alone, stored as a secret on this repo (hiking lives in the
+  # turphAI org, so it does not inherit the turphOS repos' copy).
+  TURPHOPS_ROOT: ${{ github.workspace }}/turphOps
 permissions:
   contents: read
 jobs:
@@ -24,3 +25,18 @@ jobs:
       - run: python -m pytest backend/tests -q
         env:
           PYTHONPATH: backend
+  ops:
+    runs-on: ubuntu-24.04   # Python 3.9 (the mini's) has no Ubuntu 26.04 build; ubuntu-latest becomes 26.04 from 2026-10-19
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: turphOS/turphOps
+          ssh-key: ${{ secrets.TURPHOPS_DEPLOY_KEY }}
+          path: turphOps
+      - run: echo turphOps/ >> .git/info/exclude   # not this repo's content; keeps it out of the secret scan
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - run: pip install pytest
+      - run: python -m pytest ops/tests -q
