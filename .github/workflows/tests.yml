@@ -1,0 +1,26 @@
+name: tests
+# Hiking had no CI. This runs its backend tests (the seed's in-place sync, so far) on every
+# push and PR. They are offline and need only the app's own requirements.
+#
+# NOT here yet: the ops tests (ops/tests). They import the shared ops core from the private
+# turphOps repo, which needs a read-only deploy key stored as the TURPHOPS_DEPLOY_KEY
+# secret on this repo (hiking lives in the turphAI org, so it does not inherit turphOS's).
+# Once that secret exists, copy the `pytest` job from turphOS/turphReLo's tests.yml. Until
+# then the ops tests run by hand: TURPHOPS_ROOT=~/Projects/turphOps python -m pytest ops/tests
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  backend:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r backend/requirements.txt pytest
+      - run: python -m pytest backend/tests -q
+        env:
+          PYTHONPATH: backend
