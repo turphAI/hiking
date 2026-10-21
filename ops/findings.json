@@ -1,18 +1,19 @@
 {
-  "last_reviewed": "2026-10-18",
+  "last_reviewed": "2026-10-21",
   "_note": "Code-health findings ledger. Source of truth (in git). Review passes (founding sweep, scheduled sweep, PR-gate) append/update entries here; ops/agent.py shapes this into _ops/quality.json per turphOps CONTRACT.md §4.7. severity: high|medium|low. status: open|resolved|wontfix. area: security|durability|data_integrity|efficiency. Optional lifecycle (§4.7): state open|fix_in_flight|resolved_pending_verify|resolved|accepted|parked refines status; fix_ref, verdict_reason, verdict_at, sweep_id.",
   "findings": [
     {
       "id": "seed-reseed-breaks-hike-fk",
       "severity": "high",
       "area": "data_integrity",
-      "status": "open",
+      "status": "resolved",
       "headline": "The peak-seed script deletes and reinserts all peaks with fresh ids but never touches hikes, so re-running it after any hike is logged either fails on the foreign-key check or reattaches hikes to the wrong peak.",
       "location": "backend/seed.py:20",
       "first_seen": "2026-10-11",
-      "resolved_at": null,
+      "resolved_at": "2026-10-21",
       "detail_url": null,
-      "plain": "Updating the mountain list after logging a hike can crash the update or attach old hike notes to the wrong peak."
+      "plain": "Updating the mountain list after logging a hike can crash the update or attach old hike notes to the wrong peak.",
+      "resolved_by": "recheck"
     },
     {
       "id": "weather-fetch-blocks-single-threaded-server",
@@ -79,9 +80,32 @@
       "severity": "low",
       "area": "docs",
       "status": "open",
-      "headline": "STATUS.md unchanged across 11 commits to code since 2026-08-19 — reconcile it or confirm it still reflects reality.",
+      "headline": "STATUS.md unchanged across 14 commits to code since 2026-08-19 — reconcile it or confirm it still reflects reality.",
       "location": "STATUS.md",
       "first_seen": "2026-10-11",
+      "resolved_at": null,
+      "detail_url": null
+    },
+    {
+      "id": "spa-static-file-existence-oracle",
+      "severity": "low",
+      "area": "security",
+      "status": "open",
+      "headline": "The SPA fallback route checks file existence with an unsanitized, unresolved path before Flask's safe directory join runs, so a crafted URL path can reveal whether an arbitrary file exists on the host even though its contents are never returned.",
+      "location": "backend/app.py:232-236",
+      "first_seen": "2026-10-21",
+      "resolved_at": null,
+      "detail_url": null,
+      "plain": "A crafted link could reveal if a file exists elsewhere on the server."
+    },
+    {
+      "id": "dep-npm-vite",
+      "severity": "high",
+      "area": "security",
+      "status": "open",
+      "headline": "npm dependency vite 8.2.0 - 8.2.2 has a high advisory — launch-editor: escapeCmdArgs() omits % escaping on Windows.",
+      "location": "frontend/package.json",
+      "first_seen": "2026-10-21",
       "resolved_at": null,
       "detail_url": null
     }
