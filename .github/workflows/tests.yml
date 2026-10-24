@@ -2,7 +2,10 @@ name: tests
 # Hiking's backend tests (Python 3.12, the app's own requirements) and its ops tests (Python 3.9,
 # the mini's system python3, which the stdlib-only ops agent runs on). Offline; fixtures only.
 on:
+  # push to main only: a branch push with an open PR already runs via pull_request, so
+  # an all-branch push trigger runs every PR commit twice.
   push:
+    branches: [main]
   pull_request:
 env:
   # The shared ops core is imported from turphOps (journal 035); the runner has no
