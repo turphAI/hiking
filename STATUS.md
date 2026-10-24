@@ -42,19 +42,45 @@ Architecture/spec lives in `CLAUDE.md`, ideation trail in
   **open, not yet merged/pulled to the mini** (a separate repo's PR; left for
   a deliberate merge decision rather than self-merged).
 
+## Since then (as of 2026-10-24)
+
+No user-facing feature work — everything below is ops, CI and correctness.
+The app on the mini behaves as described above.
+
+- **Weekly automated code-health sweep is live.** Sweeps have been landing
+  findings in `ops/findings.json` since 2026-10-11, so hiking is in
+  `turphOps/deploy/sweep-all.sh`'s `REPOS=` list now. The automated dependency
+  fixer is wired up too — vite, devalue and brace-expansion advisories were
+  each found and bumped without hand-holding.
+- **Shared ops core.** `contract`/`issue`/`scanners` are no longer vendored
+  here; they're imported from `turphOps/ops_core`, found by `ops/__init__.py`
+  (turphOps journal 035). ~2,100 lines of duplicated code left the repo.
+- **CI.** `.github/workflows/tests.yml` runs the backend tests (Python 3.12)
+  and the ops tests (Python 3.9, matching the mini's system python) on every
+  push and PR.
+- **Data-integrity fix:** re-running the peak seed used to either fail the
+  foreign-key check or reattach logged hikes to the wrong peak. Re-seeding now
+  keeps hikes on their peaks.
+- Ops hardening: the secret scanner reads every file git doesn't ignore as it
+  is on disk; the sweep's code-health reviewer runs against a copy rather than
+  the live repo; the sweep writes its plain-language line from the start.
+
 ## Open
 
-- Merge & pull [turphOps#95](https://github.com/turphOS/turphOps/pull/95) on
-  the mini so the coherence auditor actually watches `com.turph.hiking-ops`.
 - Generate real PWA icon PNGs — currently only an SVG favicon; the manifest
   uses it as the sole icon (`sizes: "any"`), which works but isn't the usual
-  192/512 raster set the rest of the suite ships.
+  192/512 raster set the rest of the suite ships. **Still open** — confirmed
+  2026-10-24, `frontend/public/` holds only `favicon.svg`.
 - Backfill the 6 trailhead / 2 summit coordinates that no source could verify
-  (see `backend/data/SOURCES.md`) if/when a better source turns up.
-- hiking isn't yet in `turphOps/deploy/sweep-all.sh`'s `REPOS=` list or
-  `coherence.py`'s `_sweep_rows()` — the weekly automated code-health sweep
-  won't pick it up until that's added (separate from the health-row wiring
-  above; not done here, scope was the deploy itself).
+  (see `backend/data/SOURCES.md`) if/when a better source turns up. **Still
+  open** — confirmed 2026-10-24 against `seed_peaks.json`.
+- Merge & pull [turphOps#95](https://github.com/turphOS/turphOps/pull/95) on
+  the mini so the coherence auditor actually watches `com.turph.hiking-ops`.
+  Status not verifiable from inside this repo — check it there.
+- Two low-severity code-health findings are open against `backend/app.py` (a
+  single-threaded server that stalls on a slow weather lookup; a file-existence
+  oracle in the SPA fallback route). `ops/findings.json`, not this list, is the
+  live view.
 
 ## Fast-follows (not blocking v1)
 
