@@ -79,12 +79,13 @@
       "id": "status-doc-stale",
       "severity": "low",
       "area": "docs",
-      "status": "open",
+      "status": "resolved",
       "headline": "STATUS.md unchanged across 14 commits to code since 2026-08-19 \u2014 reconcile it or confirm it still reflects reality.",
       "location": "STATUS.md",
       "first_seen": "2026-10-11",
-      "resolved_at": null,
-      "detail_url": null
+      "resolved_at": "2026-10-24",
+      "detail_url": null,
+      "resolved_by": "verifier"
     },
     {
       "id": "spa-static-file-existence-oracle",
