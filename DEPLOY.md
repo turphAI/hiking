@@ -10,7 +10,7 @@ process, port, or database with any other app.
 ## What runs
 
 - Flask (`backend/app.py`) bound to `127.0.0.1:5056`, supervised by launchd, KeepAlive on.
-- `tailscale serve` mounts this app at `https://mini.tail5ef0b2.ts.net/hiking/`.
+- `tailscale serve` mounts this app at `https://mini.<tailnet>.ts.net/hiking/`.
 - The built SPA in `static/` (regenerated from `frontend/` on each deploy), base `/hiking/`.
 - SQLite DB at `data/hiking.db` (gitignored).
 
@@ -58,7 +58,7 @@ Verify:
 curl -s http://127.0.0.1:5056/api/health
 # {"matched_path":"/api/health","ok":true,"service":"hiking"}
 
-curl -s https://mini.tail5ef0b2.ts.net/hiking/api/health
+curl -s https://mini.<tailnet>.ts.net/hiking/api/health
 
 # Confirm every app's mount is still present, not clobbered.
 tailscale serve status
