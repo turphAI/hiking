@@ -1,6 +1,6 @@
 # STATUS
 
-**Live on the mini** — `https://mini.tail5ef0b2.ts.net/hiking/`, port 5056.
+**Live on the mini** — `https://mini.<tailnet>.ts.net/hiking/`, port 5056.
 Architecture/spec lives in `CLAUDE.md`, ideation trail in
 `docs/design-journal/`.
 

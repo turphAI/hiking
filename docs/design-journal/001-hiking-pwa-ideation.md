@@ -9,7 +9,7 @@ Scoped end-to-end in chat after an earlier planning thread got deleted before
 anything was written down — this entry (plus `CLAUDE.md`) exists so that doesn't
 happen twice. Built the full v1 (all 94 peaks, list + detail, weather auto-fill,
 orientation map), vendored the `_ops` agent, and deployed to the mini — live at
-`https://mini.tail5ef0b2.ts.net/hiking/`. See `STATUS.md` for what's still open
+`https://mini.<tailnet>.ts.net/hiking/`. See `STATUS.md` for what's still open
 (mostly the `turphOps` catalog-wiring PR and the two elevation-profile/live-
 weather fast-follows below).
 
