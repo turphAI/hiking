@@ -19,13 +19,14 @@
       "id": "weather-fetch-blocks-single-threaded-server",
       "severity": "low",
       "area": "efficiency",
-      "status": "open",
+      "status": "resolved",
       "headline": "app.run() starts without threaded=True, so the server handles one request at a time and a slow weather lookup during a hike save stalls every other request.",
       "location": "backend/app.py:271",
       "first_seen": "2026-10-11",
-      "resolved_at": null,
+      "resolved_at": "2026-11-01",
       "detail_url": null,
-      "plain": "Saving a hike's weather can freeze the whole app for a few seconds for anyone else using it."
+      "plain": "Saving a hike's weather can freeze the whole app for a few seconds for anyone else using it.",
+      "resolved_by": "recheck"
     },
     {
       "id": "dep-npm-brace-expansion",
