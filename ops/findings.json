@@ -215,12 +215,16 @@
       "id": "dep-npm-glob",
       "severity": "medium",
       "area": "security",
-      "status": "open",
+      "status": "wontfix",
       "headline": "npm dependency glob 3.0.0 - 14.0.1 has a moderate advisory \u2014 Glob: AbortSignal cancellation bypass allows post-timeout filesystem traversal.",
       "location": "frontend/package.json",
       "first_seen": "2026-11-01",
       "resolved_at": null,
-      "detail_url": null
+      "detail_url": null,
+      "state": "parked",
+      "verdict_reason": "The only fix npm offers is a semver-major change to vite-plugin-pwa, which needs a human upgrade decision. Parked until upstream publishes a fix.",
+      "verdict_at": "2026-11-02",
+      "decided_by": "tom"
     },
     {
       "id": "dep-npm-minimatch",
