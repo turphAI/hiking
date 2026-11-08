@@ -1,5 +1,5 @@
 {
-  "last_reviewed": "2026-11-04",
+  "last_reviewed": "2026-11-08",
   "_note": "Code-health findings ledger. Source of truth (in git). Review passes (founding sweep, scheduled sweep, PR-gate) append/update entries here; ops/agent.py shapes this into _ops/quality.json per turphOps CONTRACT.md §4.7. severity: high|medium|low. status: open|resolved|wontfix. area: security|durability|data_integrity|efficiency. Optional lifecycle (§4.7): state open|fix_in_flight|resolved_pending_verify|resolved|accepted|parked refines status; fix_ref, verdict_reason, verdict_at, sweep_id.",
   "findings": [
     {
@@ -81,7 +81,7 @@
       "severity": "low",
       "area": "docs",
       "status": "open",
-      "headline": "STATUS.md unchanged across 5 commits to code since 2026-10-28 — reconcile it or confirm it still reflects reality.",
+      "headline": "STATUS.md unchanged across 6 commits to code since 2026-10-28 — reconcile it or confirm it still reflects reality.",
       "location": "STATUS.md",
       "first_seen": "2026-10-11",
       "resolved_at": null,
@@ -230,7 +230,7 @@
       "severity": "medium",
       "area": "security",
       "status": "open",
-      "headline": "npm dependency minimatch <11.0.1 has a moderate advisory — minimatch has potential denial of service via globparts amplification.",
+      "headline": "npm dependency minimatch 7.0.0 - 11.0.0 has a moderate advisory — minimatch has potential denial of service via globparts amplification.",
       "location": "frontend/package.json",
       "first_seen": "2026-11-01",
       "resolved_at": null,
