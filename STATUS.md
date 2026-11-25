@@ -42,7 +42,7 @@ Architecture/spec lives in `CLAUDE.md`, ideation trail in
   **open, not yet merged/pulled to the mini** (a separate repo's PR; left for
   a deliberate merge decision rather than self-merged).
 
-## Since then (as of 2026-10-24)
+## Since then (as of 2026-11-25)
 
 No user-facing feature work — everything below is ops, CI and correctness.
 The app on the mini behaves as described above.
@@ -51,7 +51,10 @@ The app on the mini behaves as described above.
   findings in `ops/findings.json` since 2026-10-11, so hiking is in
   `turphOps/deploy/sweep-all.sh`'s `REPOS=` list now. The automated dependency
   fixer is wired up too — vite, devalue and brace-expansion advisories were
-  each found and bumped without hand-holding.
+  each found and bumped without hand-holding, and fast-uri followed on
+  2026-10-30 (`5e83297`). Two advisories (deepmerge, glob) were parked on
+  2026-11-02: npm's only fix is a semver-major vite-plugin-pwa upgrade, which
+  is a human call.
 - **Shared ops core.** `contract`/`issue`/`scanners` are no longer vendored
   here; they're imported from `turphOps/ops_core`, found by `ops/__init__.py`
   (turphOps journal 035). ~2,100 lines of duplicated code left the repo.
@@ -70,17 +73,19 @@ The app on the mini behaves as described above.
 - Generate real PWA icon PNGs — currently only an SVG favicon; the manifest
   uses it as the sole icon (`sizes: "any"`), which works but isn't the usual
   192/512 raster set the rest of the suite ships. **Still open** — confirmed
-  2026-10-24, `frontend/public/` holds only `favicon.svg`.
+  2026-11-25, `frontend/public/` holds only `favicon.svg`.
 - Backfill the 6 trailhead / 2 summit coordinates that no source could verify
   (see `backend/data/SOURCES.md`) if/when a better source turns up. **Still
   open** — confirmed 2026-10-24 against `seed_peaks.json`.
 - Merge & pull [turphOps#95](https://github.com/turphOS/turphOps/pull/95) on
   the mini so the coherence auditor actually watches `com.turph.hiking-ops`.
   Status not verifiable from inside this repo — check it there.
-- Two low-severity code-health findings are open against `backend/app.py` (a
-  single-threaded server that stalls on a slow weather lookup; a file-existence
-  oracle in the SPA fallback route). `ops/findings.json`, not this list, is the
-  live view.
+- Code-health findings are still open — as of 2026-11-25 these include a
+  debug-mode guard that doesn't account for the tailnet proxy (high), a
+  file-existence oracle in the SPA fallback route, a seed-sync duplicate-peak
+  edge case, a missing `hikes.peak_id` index, and a minimatch advisory. The
+  single-threaded-server finding was resolved 2026-11-01. `ops/findings.json`,
+  not this list, is the live view.
 
 ## Fast-follows (not blocking v1)
 
